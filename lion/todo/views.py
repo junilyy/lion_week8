@@ -18,11 +18,12 @@ class TodoList(APIView):
         serializer = TodoListSerializer(todos, many=True)
         return Response(serializer.data)
 
-    #post 시 작성 항목을 제한하는 방법은 뭘까...
     def post(self, request):
-        serializer = TodoSerializer(data=request.data)
+        #complete 값을 적어도 반영되지 않게 PutTodoSerializer 이용(complete가 filed에서 제외)
+        serializer = PutTodoSerializer(data=request.data)
         if serializer.is_valid(): #유효성 검사
             serializer.save() # 저장
+            #출력 형태가 전체조회 양식과 맞지 않음... -> 해결 필요.
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -60,7 +61,7 @@ class TodoDetail(APIView):
 class TodoDoneList(APIView):
     def get(self, request):
         todos = Todo.objects.filter(complete="True")
-        serializer = TodoSerializer(todos, many=True)
+        serializer = TodoListSerializer(todos, many=True)
         return Response(serializer.data)
 
 #complete 상태를 True로 변경
